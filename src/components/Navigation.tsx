@@ -25,7 +25,7 @@ export const Navigation = () => {
           variant="outline"
           size="icon"
           onClick={toggleMenu}
-          className="bg-background/95 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all"
+          className="glass backdrop-blur-md shadow-soft hover:shadow-glow transition-all duration-500 border-primary/20 hover:border-primary/40"
           aria-label="Toggle menu"
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -34,8 +34,8 @@ export const Navigation = () => {
 
       {/* Logo */}
       <div className="fixed top-6 left-20 z-40 flex items-center gap-2">
-        <Sun className="h-6 w-6 text-primary" />
-        <span className="font-bold text-xl">Solarify</span>
+        <Sun className="h-6 w-6 text-primary animate-pulse" />
+        <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Solarify</span>
       </div>
 
       {/* Full-screen menu overlay */}
@@ -45,27 +45,27 @@ export const Navigation = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-background/98 backdrop-blur-md z-40"
+            transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+            className="fixed inset-0 glass-dark backdrop-blur-xl z-40"
           >
             <motion.nav
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="flex flex-col items-center justify-center h-full gap-8"
+              transition={{ duration: 0.5, delay: 0.1, ease: [0.34, 1.56, 0.64, 1] }}
+              className="flex flex-col items-center justify-center h-full gap-6"
             >
               {menuItems.map((item, index) => (
                 <motion.div
                   key={item.to}
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 + index * 0.1 }}
+                  transition={{ delay: 0.2 + index * 0.1, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
                 >
                   <NavLink
                     to={item.to}
                     onClick={closeMenu}
-                    className="text-5xl md:text-7xl font-bold hover:text-primary transition-colors"
+                    className="text-4xl md:text-6xl font-bold hover:text-primary transition-all duration-500 hover:scale-105 inline-block"
                     activeClassName="text-primary"
                   >
                     {item.label}

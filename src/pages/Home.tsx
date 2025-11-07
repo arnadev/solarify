@@ -1,13 +1,50 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, Users, Leaf, Sun, Wind, Battery } from 'lucide-react';
+import { ArrowRight, Zap, Users, Leaf, Sun, Wind, Battery, Sparkles, TrendingUp, CheckCircle } from 'lucide-react';
 import heroImage from '@/assets/hero-sunrise-city.jpg';
 import communityImage from '@/assets/community-solar.jpg';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Animation variants for staggered reveals
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.34, 1.56, 0.64, 1] as any,
+    },
+  },
+};
+
+const textVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      delay: 0.2,
+      ease: [0.34, 1.56, 0.64, 1] as any,
+    },
+  },
+};
 
 const Home = () => {
   const sunRef = useRef<HTMLDivElement>(null);
@@ -15,6 +52,10 @@ const Home = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cursorGlowRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const { scrollYProgress } = useScroll();
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
 
   useEffect(() => {
     if (!sunRef.current || !cityRef.current || !heroRef.current) return;
@@ -112,6 +153,15 @@ const Home = () => {
     ref.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
   };
 
+  const handleCardMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    const element = e.currentTarget;
+    const rect = element.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    element.style.setProperty('--mouse-x', `${x}%`);
+    element.style.setProperty('--mouse-y', `${y}%`);
+  };
+
   const handleCardMouseLeave = (ref: React.RefObject<HTMLDivElement>) => {
     if (!ref.current) return;
     ref.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
@@ -126,18 +176,31 @@ const Home = () => {
     element.style.setProperty('--mouse-y', `${y}%`);
   };
 
+  const handleSimpleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    const element = e.currentTarget;
+    const rect = element.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    element.style.setProperty('--mouse-x', `${x}%`);
+    element.style.setProperty('--mouse-y', `${y}%`);
+  };
+
   return (
     <div className="overflow-x-hidden">
       {/* Cursor Glow Effect */}
       <div ref={cursorGlowRef} className="cursor-glow hidden md:block" />
       
       {/* Hero Section with Sunrise Animation */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden mb-32">
+      <motion.section 
+        ref={heroRef} 
+        style={{ opacity: heroOpacity, scale: heroScale }}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden mb-16"
+      >
         <div className="absolute inset-0 gradient-sky"></div>
         
         {/* Animated Sun */}
         <div ref={sunRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="w-64 h-64 rounded-full bg-primary opacity-80 blur-3xl"></div>
+          <div className="w-64 h-64 rounded-full bg-primary opacity-50 blur-3xl animate-glow"></div>
         </div>
 
         {/* City Illustration */}
@@ -147,141 +210,205 @@ const Home = () => {
 
         {/* Hero Content */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.9, delay: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
           className="relative z-10 container mx-auto px-6 text-center"
         >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-primary/10 border border-primary/20"
+          >
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Join the renewable revolution</span>
+          </motion.div>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 text-balance">
-            Come Over to the <span className="text-primary">Solarify</span> Network
+            Come Over to the <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">Solarify</span> Network
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto text-balance">
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+            className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto text-balance"
+          >
             Making local renewable energy affordable and accessible to everyone, so that fossil fuels become a thing of the past.
-          </p>
-          <Button size="lg" className="group hover:scale-105 transition-all duration-300">
-            Let's Go Solar
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
-          </Button>
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            <Button size="lg" className="group hover:scale-105 transition-all duration-500 shadow-glow">
+              Let's Go Solar
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform duration-500" />
+            </Button>
+          </motion.div>
         </motion.div>
-      </section>
+      </motion.section>
 
       {/* About Solarify Section */}
-      <section className="py-40 bg-background">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
             className="max-w-4xl mx-auto text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">About Solarify</h2>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-12">
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-6">
+              <Sun className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">About Us</span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-6">
+              About Solarify
+            </motion.h2>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
               Solarify is on a mission to make renewable energy the default choice for communities everywhere. 
               We build and operate solar and wind farms that power local homes and businesses with clean, 
               affordable energy. Our vision is simple: accelerate the transition to 100% renewable energy 
               and make fossil fuels obsolete.
-            </p>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+            </motion.p>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               By creating distributed renewable energy networks, we're not just generating clean power — 
               we're building resilient communities, creating local jobs, and proving that sustainable energy 
               can be both affordable and reliable. Every solar panel and wind turbine we install is a step 
               toward a future free from fossil fuels.
-            </p>
+            </motion.p>
           </motion.div>
         </div>
       </section>
 
       {/* Our Impact Section */}
-      <section className="py-40 gradient-sky">
+      <section className="py-20 gradient-sky">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Our Impact</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">Real results from real communities</p>
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">Our Impact</span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-4">
+              Our Impact
+            </motion.h2>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground">
+              Real results from real communities
+            </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
             {stats.map((stat, index) => {
               const cardRef = useRef<HTMLDivElement>(null);
               return (
                 <motion.div
                   key={stat.label}
                   ref={cardRef}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-card rounded-3xl p-8 text-center shadow-soft transition-all duration-300 card-3d cursor-pointer hover-gradient"
+                  variants={itemVariants}
+                  className="bg-card rounded-2xl p-6 text-center shadow-soft transition-all duration-500 card-3d cursor-pointer bento-fill group"
                   onMouseMove={(e) => handleCardMouseMove(e, cardRef)}
+                  onMouseEnter={handleCardMouseEnter}
                   onMouseLeave={() => handleCardMouseLeave(cardRef)}
                 >
-                  <stat.icon className="w-12 h-12 mx-auto mb-4 text-primary transition-transform duration-300 group-hover:scale-110" />
-                  <div className="text-5xl font-bold text-primary mb-2">{stat.value}</div>
-                  <div className="text-lg text-muted-foreground">{stat.label}</div>
+                  <stat.icon className="w-10 h-10 mx-auto mb-4 text-primary transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" />
+                  <div className="text-4xl md:text-5xl font-bold text-primary mb-2">{stat.value}</div>
+                  <div className="text-base text-muted-foreground">{stat.label}</div>
                 </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Our Philosophy Section */}
-      <section className="py-40 bg-background">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Our Philosophy</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">What drives us forward</p>
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
+              <CheckCircle className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">Our Philosophy</span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-4">
+              Our Philosophy
+            </motion.h2>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground">
+              What drives us forward
+            </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
             {philosophy.map((item, index) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center group hover-gradient"
+                variants={itemVariants}
+                className="text-center group bento-fill p-6 rounded-2xl transition-all duration-500"
                 onMouseMove={handleSimpleMouseMove}
+                onMouseEnter={handleSimpleMouseEnter}
               >
-                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
-                  <item.icon className="w-10 h-10 text-primary transition-transform duration-500 group-hover:scale-110" />
+                <div className="w-16 h-16 mx-auto mb-5 rounded-xl bg-gradient-accent flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-soft bento-fill-small">
+                  <item.icon className="w-8 h-8 text-white transition-transform duration-500 group-hover:scale-110" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 transition-colors duration-300 group-hover:text-primary">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                <h3 className="text-xl font-bold mb-3 transition-colors duration-300 group-hover:text-primary">{item.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">{item.description}</p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-40 gradient-sky">
+      <section className="py-20 gradient-sky">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">How It Works</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">Your journey to clean energy in three simple steps</p>
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
+              <Zap className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">How It Works</span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-4">
+              How It Works
+            </motion.h2>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground">
+              Your journey to clean energy in three simple steps
+            </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {[
               {
                 step: '01',
@@ -301,75 +428,101 @@ const Home = () => {
             ].map((item, index) => (
               <motion.div
                 key={item.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center group"
+                variants={itemVariants}
+                className="text-center group relative"
               >
-                <div className="text-6xl font-bold text-primary/20 mb-6 group-hover:text-primary/40 transition-colors duration-300">
+                <div className="text-5xl font-bold text-primary/20 mb-5 group-hover:text-primary/40 transition-all duration-500 group-hover:scale-110">
                   {item.step}
                 </div>
-                <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors duration-300">
+                <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors duration-300">
                   {item.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                <p className="text-muted-foreground leading-relaxed text-sm">{item.description}</p>
+                {index < 2 && (
+                  <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-primary/30 to-transparent -translate-x-1/2"></div>
+                )}
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-40 bg-background">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">What Our Customers Say</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">Real stories from the Solarify community</p>
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
+              <Users className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">Testimonials</span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-4">
+              What Our Customers Say
+            </motion.h2>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground">
+              Real stories from the Solarify community
+            </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                className="bg-card rounded-3xl p-8 shadow-soft transition-all duration-300 cursor-pointer border border-transparent hover-gradient"
+                variants={itemVariants}
+                whileHover={{ scale: 1.03 }}
+                className="bg-card rounded-2xl p-6 shadow-soft transition-all duration-500 cursor-pointer border border-transparent bento-fill"
                 onMouseMove={handleSimpleMouseMove}
+                onMouseEnter={handleSimpleMouseEnter}
               >
-                <p className="text-lg mb-6 italic">"{testimonial.quote}"</p>
-                <div className="font-semibold">{testimonial.author}</div>
-                <div className="text-sm text-muted-foreground">{testimonial.location}</div>
+                <p className="text-base mb-5 italic leading-relaxed">"{testimonial.quote}"</p>
+                <div className="font-semibold text-sm">{testimonial.author}</div>
+                <div className="text-xs text-muted-foreground">{testimonial.location}</div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Environmental Benefits Section */}
-      <section className="py-40 gradient-sky">
+      <section className="py-20 gradient-sky">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Environmental Benefits</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">Every kilowatt-hour from renewable sources makes a difference</p>
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
+              <Leaf className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">Environmental Impact</span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold mb-4">
+              Environmental Benefits
+            </motion.h2>
+            <motion.p variants={textVariants} className="text-lg md:text-xl text-muted-foreground">
+              Every kilowatt-hour from renewable sources makes a difference
+            </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             {[
               {
                 title: 'Zero Emissions',
@@ -398,36 +551,34 @@ const Home = () => {
             ].map((benefit, index) => (
               <motion.div
                 key={benefit.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-card rounded-3xl p-8 shadow-soft transition-all duration-300 hover-gradient"
+                variants={itemVariants}
+                className="bg-card rounded-2xl p-6 shadow-soft transition-all duration-500 bento-fill"
                 onMouseMove={handleSimpleMouseMove}
+                onMouseEnter={handleSimpleMouseEnter}
               >
-                <div className="flex items-start justify-between mb-6">
-                  <h3 className="text-2xl font-bold">{benefit.title}</h3>
+                <div className="flex items-start justify-between mb-5">
+                  <h3 className="text-xl font-bold">{benefit.title}</h3>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-primary">{benefit.stat}</div>
-                    <div className="text-sm text-muted-foreground">{benefit.label}</div>
+                    <div className="text-2xl font-bold text-primary">{benefit.stat}</div>
+                    <div className="text-xs text-muted-foreground">{benefit.label}</div>
                   </div>
                 </div>
-                <p className="text-muted-foreground leading-relaxed">{benefit.description}</p>
+                <p className="text-muted-foreground leading-relaxed text-sm">{benefit.description}</p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Community Image Section */}
-      <section className="py-40 bg-background">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="rounded-3xl overflow-hidden shadow-soft"
+            transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] as any }}
+            className="rounded-3xl overflow-hidden shadow-glow"
           >
             <img src={communityImage} alt="Community powered by solar" className="w-full h-auto" />
           </motion.div>
@@ -435,24 +586,28 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-40 gradient-solar">
-        <div className="container mx-auto px-6">
+      <section className="py-24 gradient-solar relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white blur-3xl animate-float"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        </div>
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] as any }}
             className="text-center"
           >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 text-primary-foreground">
+            <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
               We're Ready — Are You?
             </h2>
-            <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
               Join thousands of homes and businesses already powered by clean, local energy.
             </p>
-            <Button size="lg" variant="secondary" className="group hover:scale-105 transition-all duration-300">
+            <Button size="lg" variant="secondary" className="group hover:scale-105 transition-all duration-500 shadow-glow bg-white text-primary hover:bg-white/90">
               Switch to Solarify
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform duration-500" />
             </Button>
           </motion.div>
         </div>
