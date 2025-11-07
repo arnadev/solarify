@@ -57,6 +57,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        solar: {
+          yellow: '#FFD23F',
+          orange: '#FF7A00',
+          lime: '#A3E635',
+          green: '#2E8B57',
+          mint: '#6EE7B7',
+          light: '#FDFCF6',
+          mist: '#FAF8ED',
+          charcoal: '#1C1C1C',
+          graphite: '#4A4A4A',
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
